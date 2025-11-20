@@ -4,17 +4,10 @@ on:
   push:
     branches:
       - main
-  pull_request:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment (dev, qa, stg, prod)'
-        required: false
-        default: 'dev'
 
 jobs:
   deploy-dev:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       ENV: dev
@@ -24,7 +17,7 @@ jobs:
         run: echo "Deploying to DEV environment"
 
   deploy-qa:
-    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'qa')
+    needs: deploy-dev
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,7 +30,7 @@ jobs:
         run: echo "Deploying to ${{ env.ENV }} environment"
 
   deploy-stg:
-    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'stg'
+    needs: deploy-qa
     runs-on: ubuntu-latest
     env:
       ENV: stg
@@ -47,7 +40,7 @@ jobs:
         run: echo "Deploying to STAGING environment"
 
   deploy-prod:
-    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'prod'
+    needs: deploy-stg
     runs-on: ubuntu-latest
     env:
       ENV: prod
