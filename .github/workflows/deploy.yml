@@ -1,0 +1,57 @@
+name: Multi-Environment Deployment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (dev, qa, stg, prod)'
+        required: false
+        default: 'dev'
+
+jobs:
+  deploy-dev:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      ENV: dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Dev
+        run: echo "Deploying to DEV environment"
+
+  deploy-qa:
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'qa')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        qa_env: [qa1, qa2, qa3]
+    env:
+      ENV: ${{ matrix.qa_env }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to QA
+        run: echo "Deploying to ${{ env.ENV }} environment"
+
+  deploy-stg:
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'stg'
+    runs-on: ubuntu-latest
+    env:
+      ENV: stg
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging
+        run: echo "Deploying to STAGING environment"
+
+  deploy-prod:
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'prod'
+    runs-on: ubuntu-latest
+    env:
+      ENV: prod
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Production
+        run: echo "Deploying to PRODUCTION environment"
