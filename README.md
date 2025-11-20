@@ -5,6 +5,7 @@ This is a sample Node.js project demonstrating multi-environment deployment usin
 - Multiple QA environments (qa1, qa2, qa3)
 - Staging (stg)
 - Production (prod)
+- test
 
 ## Project Structure
 - `app.js`: Simple Node.js app
